@@ -36,14 +36,13 @@
   background-color: rgb(0 125 255 / 0.25);
 }
 
-:where([is="tree-view"] [aria-expanded]:focus-visible) {
+:where([role="tree"] [role="treeitem"]:focus-visible) {
   outline: 0;
 }
 
 :where(
-  [is="tree-view"]:focus-visible,
-  [is="tree-view"] [aria-selected="true"]:not([aria-expanded]):focus-visible,
-  [is="tree-view"] [aria-selected="true"][aria-expanded="true"]:focus-visible > :first-child,
+  [role="tree"] [role="treeitem"]:not([aria-expanded]):focus-visible,
+  [role="tree"] [role="treeitem"][aria-expanded]:focus-visible > :first-child,
 ) {
   outline: 2px solid dodgerblue;
 }
