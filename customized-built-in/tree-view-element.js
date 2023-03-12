@@ -37,27 +37,8 @@ export class TreeViewElement extends HTMLUListElement {
       }
 
       const target = nestedList ? listItem.querySelector(":scope > :first-child") : listItem;
-      target.addEventListener('click', event => {
-        const treeItem = event.currentTarget.closest('[role="treeitem"]');
-        const expandable = treeItem.matches('[aria-expanded]');
-
-        if (expandable) {
-          treeItem.setAttribute(
-            'aria-expanded',
-            JSON.stringify(!JSON.parse(treeItem.ariaExpanded))
-          );
-        }
-
-        const treeView = event.currentTarget.closest('[role="tree"]');
-
-        treeView.querySelectorAll('[aria-selected="true"]').forEach(selected => selected.setAttribute('aria-selected', 'false'));
-        treeItem.setAttribute('aria-selected', 'true');
-        treeView.querySelectorAll('[tabindex="0"]').forEach(focused => focused.tabIndex = -1);
-        treeItem.tabIndex = 0;
-      });
+      target.addEventListener('click', handleTreeItemClick);
     }
-
-    console.log(this.#treeItems);
 
     // what is a selector for items that can currently be focused
 
@@ -123,6 +104,7 @@ export class TreeViewElement extends HTMLUListElement {
           }
           break;
         }
+        case ' ':
         case 'Enter': {
           let treeItem = event.target;
           if (treeItem.ariaSelected === "false") {
@@ -131,6 +113,36 @@ export class TreeViewElement extends HTMLUListElement {
               .forEach(selectedTreeItem => selectedTreeItem.ariaSelected = "false");
           }
           treeItem.ariaSelected = JSON.stringify(!JSON.parse(treeItem.ariaSelected));
+          break;
+        }
+        case 'Home': {
+          const [firstTreeItem] = this.#focusableTreeItems;
+          this.querySelector('[tabindex="0"]').tabIndex = -1;
+          firstTreeItem.tabIndex = 0;
+          firstTreeItem.focus();
+          break;
+        }
+        case 'End': {
+          const lastTreeItem = Array.from(this.#focusableTreeItems).at(-1);
+          this.querySelector('[tabindex="0"]').tabIndex = -1;
+          lastTreeItem.tabIndex = 0;
+          lastTreeItem.focus();
+          break;
+        }
+        case '*': {
+          const treeItem = event.target;
+          const parentGroup = treeItem.closest('[role="group"]');
+          const expandableTreeItemsAtLevel = (parentGroup ?? this).querySelectorAll(':scope > [role="treeitem"][aria-expanded="false"]');
+
+          for (const expandableTreeItem of expandableTreeItemsAtLevel) {
+            expandableTreeItem.ariaExpanded = "true";
+          }
+
+          break;
+        }
+        // TODO: typeahead
+        default: {
+          console.log(event.key);
         }
       }
     });
@@ -145,4 +157,25 @@ export class TreeViewElement extends HTMLUListElement {
       window.customElements.define("tree-view", this, { extends: "ul" });
     }
   }
+}
+
+function handleTreeItemClick(event) {
+  const treeItem = event.currentTarget.closest('[role="treeitem"]');
+  const expandable = treeItem.matches('[aria-expanded]');
+
+  if (expandable) {
+    treeItem.setAttribute(
+      'aria-expanded',
+      JSON.stringify(!JSON.parse(treeItem.ariaExpanded))
+    );
+  }
+
+  const treeView = event.currentTarget.closest('[role="tree"]');
+
+  for (const selected of treeView.querySelectorAll('[aria-selected="true"]')) {
+    selected.ariaSelected = "false";
+  }
+  treeItem.ariaSelected = "true";
+  treeView.querySelectorAll('[tabindex="0"]').forEach(focused => focused.tabIndex = -1);
+  treeItem.tabIndex = 0;
 }
