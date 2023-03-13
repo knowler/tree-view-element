@@ -175,7 +175,7 @@ function handleTreeItemClick(event) {
   const treeView = event.currentTarget.closest('[role="tree"]');
 
   for (const selected of treeView.querySelectorAll('[aria-selected="true"]')) {
-    selected.setAttribute("aria-expanded", "false");
+    selected.setAttribute("aria-selected", "false");
   }
   treeItem.setAttribute("aria-selected", "true");
   treeView.querySelectorAll('[tabindex="0"]').forEach(focused => focused.tabIndex = -1);
