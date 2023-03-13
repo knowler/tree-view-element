@@ -18,19 +18,19 @@ export class TreeViewElement extends HTMLUListElement {
   connectedCallback() {
     const {signal} = this.#controller = new AbortController();
 
-    this.role = "tree";
+    this.setAttribute("role", "tree");
 
     let treeItemId = 0;
     for (const listItem of this.querySelectorAll("li")) {
-      listItem.role = "treeitem";
+      listItem.setAttribute("role", "treeitem");
       listItem.tabIndex = treeItemId === 0 ? 0 : -1;
       listItem.id = `tree-view-item-${treeItemId++}`;
-      listItem.ariaSelected = "false";
+      listItem.setAttribute("aria-selected", "false");
 
       const nestedList = listItem.querySelector(":scope > ul");
       if (nestedList) {
-        nestedList.role = "group";
-        listItem.ariaExpanded = "false";
+        nestedList.setAttribute("role", "group");
+        listItem.setAttribute("aria-expanded", "false");
       }
 
       const target = nestedList ? listItem.querySelector(":scope > :first-child") : listItem;
@@ -71,10 +71,10 @@ export class TreeViewElement extends HTMLUListElement {
         }
         case 'ArrowRight': {
           const treeItem = event.target;
-          if (treeItem.ariaExpanded === "false") {
-            treeItem.ariaExpanded = "true";
+          if (treeItem.getAttribute("aria-expanded") === "false") {
+            treeItem.setAttribute("aria-expanded", "true");
             break;
-          } else if (treeItem.ariaExpanded === "true") {
+          } else if (treeItem.getAttribute("aria-expanded") === "true") {
             // descend into tree
             const firstNestedTreeItem = treeItem.querySelector(':scope > [role="group"] > [role="treeitem"]');
             treeItem.tabIndex = -1;
@@ -87,8 +87,8 @@ export class TreeViewElement extends HTMLUListElement {
         }
         case 'ArrowLeft': {
           let treeItem = event.target;
-          if (treeItem.ariaExpanded === "true") {
-            treeItem.ariaExpanded = "false";
+          if (treeItem.getAttribute("aria-expanded") === "true") {
+            treeItem.setAttribute("aria-expanded", "false");
             break;
           } else {
             // ascend to parent
@@ -104,12 +104,17 @@ export class TreeViewElement extends HTMLUListElement {
         case ' ':
         case 'Enter': {
           let treeItem = event.target;
-          if (treeItem.ariaSelected === "false") {
+          if (treeItem.getAttribute("aria-selected") === "false") {
             treeItem.closest('[role="tree"]')
               .querySelectorAll('[role="treeitem"][aria-selected="true"]')
-              .forEach(selectedTreeItem => selectedTreeItem.ariaSelected = "false");
+              .forEach(selectedTreeItem => selectedTreeItem.setAttribute("aria-selected", "false"));
           }
-          treeItem.ariaSelected = JSON.stringify(!JSON.parse(treeItem.ariaSelected));
+          treeItem.setAttribute(
+            "aria-selected",
+            JSON.stringify(
+              !JSON.parse(treeItem.getAttribute("aria-selected")),
+            ),
+          );
           break;
         }
         case 'Home': {
@@ -132,7 +137,7 @@ export class TreeViewElement extends HTMLUListElement {
           const expandableTreeItemsAtLevel = (parentGroup ?? this).querySelectorAll(':scope > [role="treeitem"][aria-expanded="false"]');
 
           for (const expandableTreeItem of expandableTreeItemsAtLevel) {
-            expandableTreeItem.ariaExpanded = "true";
+            expandableTreeItem.setAttribute("aria-expanded", "true");
           }
 
           break;
@@ -150,8 +155,8 @@ export class TreeViewElement extends HTMLUListElement {
 
   static define() {
     if (!window.customElements.get("tree-view")) {
-      window.TreeViewElement = this;
-      window.customElements.define("tree-view", this, { extends: "ul" });
+      window.TreeViewElement = TreeViewElement;
+      window.customElements.define("tree-view", TreeViewElement, { extends: "ul" });
     }
   }
 }
@@ -163,16 +168,16 @@ function handleTreeItemClick(event) {
   if (expandable) {
     treeItem.setAttribute(
       'aria-expanded',
-      JSON.stringify(!JSON.parse(treeItem.ariaExpanded))
+      JSON.stringify(!JSON.parse(treeItem.getAttribute("aria-expanded")))
     );
   }
 
   const treeView = event.currentTarget.closest('[role="tree"]');
 
   for (const selected of treeView.querySelectorAll('[aria-selected="true"]')) {
-    selected.ariaSelected = "false";
+    selected.setAttribute("aria-expanded", "false");
   }
-  treeItem.ariaSelected = "true";
+  treeItem.setAttribute("aria-selected", "true");
   treeView.querySelectorAll('[tabindex="0"]').forEach(focused => focused.tabIndex = -1);
   treeItem.tabIndex = 0;
 }
