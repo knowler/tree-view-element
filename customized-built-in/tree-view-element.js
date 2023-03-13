@@ -33,7 +33,7 @@ export class TreeViewElement extends HTMLUListElement {
       const nestedList = listItem.querySelector(":scope > ul");
       if (nestedList) {
         nestedList.role = "group";
-        listItem.ariaExpanded = "true";
+        listItem.ariaExpanded = "false";
       }
 
       const target = nestedList ? listItem.querySelector(":scope > :first-child") : listItem;
