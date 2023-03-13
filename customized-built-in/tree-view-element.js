@@ -142,9 +142,31 @@ export class TreeViewElement extends HTMLUListElement {
 
           break;
         }
-        // TODO: typeahead
+        // TODO: typeahead should maybe keep track that it’s in that
+        // mode and keep on going down the list of items with that
+        // character instead of just the first two.
         default: {
-          console.log(event.key);
+          // Case-insensitive check for letter key
+          if (/^[a-z]{1}$/i.test(event.key)) {
+            console.log(event.key);
+            // get all of the focusable elements
+            for (const focusableTreeItem of this.#focusableTreeItems) {
+              // Get the label from exandable ones, otherwise the label
+              // is the tree item text content.
+              const label = focusableTreeItem.matches('[aria-expanded]')
+                ? focusableTreeItem.querySelector(':scope > :first-child')?.textContent
+                : focusableTreeItem.textContent;
+
+              const [firstLetter] = label;
+
+              if (firstLetter === event.key && focusableTreeItem.tabIndex === -1) {
+                this.querySelector('[tabindex="0"]').tabIndex = -1;
+                focusableTreeItem.tabIndex = 0;
+                focusableTreeItem.focus();
+                break;
+              }
+            }
+          }
         }
       }
     });
