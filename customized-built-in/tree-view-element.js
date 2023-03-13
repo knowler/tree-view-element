@@ -1,5 +1,3 @@
-import stylesheet from "./tree-view-element.css" assert { type: "css" };
-
 // UI states:
 //
 // On initial focus, if there is no previously selected treeitem, then
@@ -19,7 +17,6 @@ export class TreeViewElement extends HTMLUListElement {
   #controller;
   connectedCallback() {
     const {signal} = this.#controller = new AbortController();
-    this.ownerDocument.adoptedStyleSheets = [stylesheet];
 
     this.role = "tree";
 
