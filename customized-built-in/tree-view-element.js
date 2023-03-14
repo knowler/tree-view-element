@@ -1,10 +1,3 @@
-// UI states:
-//
-// On initial focus, if there is no previously selected treeitem, then
-// it will focus the first treeitem.
-//
-// Clicking
-
 export class TreeViewElement extends HTMLUListElement {
   get #treeItems() {
     return this.querySelectorAll('[role="treeitem"]');
@@ -12,6 +5,17 @@ export class TreeViewElement extends HTMLUListElement {
 
   get #focusableTreeItems() {
     return this.querySelectorAll('[role="treeitem"]:is(:not([aria-expanded="false"] *))');
+  }
+
+  get #focusedTreeItem() {
+    return this.querySelector('[role="treeitem"][tabindex="0"]');
+  }
+
+  #focusTreeItem(treeItemToFocus) {
+    if (this.#focusedTreeItem) this.#focusedTreeItem.tabIndex = -1;
+
+    treeItemToFocus.tabIndex = 0;
+    treeItemToFocus.focus();
   }
 
   #controller;
@@ -47,11 +51,7 @@ export class TreeViewElement extends HTMLUListElement {
           const treeItemIndex = focusable.findIndex(item => item === treeItem);
           const previousFocusable = focusable[treeItemIndex - 1];
 
-          if (previousFocusable) {
-            treeItem.tabIndex = -1;
-            previousFocusable.tabIndex = 0;
-            previousFocusable.focus();
-          }
+          if (previousFocusable) this.#focusTreeItem(previousFocusable);
 
           break;
         }
@@ -61,11 +61,7 @@ export class TreeViewElement extends HTMLUListElement {
           const treeItemIndex = focusable.findIndex(item => item === treeItem);
           const nextFocusable = focusable[treeItemIndex + 1];
 
-          if (nextFocusable) {
-            treeItem.tabIndex = -1;
-            nextFocusable.tabIndex = 0;
-            nextFocusable.focus();
-          }
+          if (nextFocusable) this.#focusTreeItem(nextFocusable);
 
           break;
         }
@@ -77,9 +73,7 @@ export class TreeViewElement extends HTMLUListElement {
           } else if (treeItem.getAttribute("aria-expanded") === "true") {
             // descend into tree
             const firstNestedTreeItem = treeItem.querySelector(':scope > [role="group"] > [role="treeitem"]');
-            treeItem.tabIndex = -1;
-            firstNestedTreeItem.tabIndex = 0;
-            firstNestedTreeItem.focus();
+            if (firstNestedTreeItem) this.#focusTreeItem(firstNestedTreeItem);
           } else {
             // Not an expandable tree item
           }
@@ -93,11 +87,7 @@ export class TreeViewElement extends HTMLUListElement {
           } else {
             // ascend to parent
             const parentTreeItem = treeItem.closest('[role="group"]')?.closest('[role="treeitem"]');
-            if (parentTreeItem) {
-              treeItem.tabIndex = -1;
-              parentTreeItem.tabIndex = 0;
-              parentTreeItem.focus();
-            }
+            if (parentTreeItem) this.#focusTreeItem(parentTreeItem);
           }
           break;
         }
@@ -119,16 +109,12 @@ export class TreeViewElement extends HTMLUListElement {
         }
         case 'Home': {
           const [firstTreeItem] = this.#focusableTreeItems;
-          this.querySelector('[tabindex="0"]').tabIndex = -1;
-          firstTreeItem.tabIndex = 0;
-          firstTreeItem.focus();
+          if (firstTreeItem) this.#focusTreeItem(firstTreeItem);
           break;
         }
         case 'End': {
           const lastTreeItem = Array.from(this.#focusableTreeItems).at(-1);
-          this.querySelector('[tabindex="0"]').tabIndex = -1;
-          lastTreeItem.tabIndex = 0;
-          lastTreeItem.focus();
+          if (lastTreeItem) this.#focusTreeItem(lastTreeItem);
           break;
         }
         case '*': {
@@ -142,29 +128,48 @@ export class TreeViewElement extends HTMLUListElement {
 
           break;
         }
-        // TODO: typeahead should maybe keep track that it’s in that
-        // mode and keep on going down the list of items with that
-        // character instead of just the first two.
         default: {
+          // Typeahead
           // Case-insensitive check for letter key
           if (/^[a-z]{1}$/i.test(event.key)) {
-            console.log(event.key);
-            // get all of the focusable elements
-            for (const focusableTreeItem of this.#focusableTreeItems) {
+            const typeahead = event.key;
+            const focusableTreeItems = Array.from(this.#focusableTreeItems);
+
+            const candidates = [];
+            let index = 0;
+            let nextIsCandidate = false;
+            for (const focusableTreeItem of focusableTreeItems) {
+              const isLastItem = focusableTreeItems.length - 1 === index;
+
               // Get the label from exandable ones, otherwise the label
               // is the tree item text content.
               const label = focusableTreeItem.matches('[aria-expanded]')
                 ? focusableTreeItem.querySelector(':scope > :first-child')?.textContent
                 : focusableTreeItem.textContent;
+              const matches = label.substring(0, typeahead.length).startsWith(typeahead);
+              const currentIsFocused = this.#focusedTreeItem === focusableTreeItem;
 
-              const [firstLetter] = label;
+              // TODO: This is kind of horrible. Refactor this.
+              if (matches) {
+                if (nextIsCandidate) { // We know this is the one to focus so do it (breaks)
+                  this.#focusTreeItem(focusableTreeItem);
+                  break;
+                } else if (currentIsFocused && isLastItem && candidates.length > 0) { // If it’s the last item, then the first candidate should be focused
+                  const firstCandidate = candidates[0];
+                  if (firstCandidate) this.#focusTreeItem(firstCandidate);
+                  break;
+                } else candidates.push(focusableTreeItem);
+              }
 
-              if (firstLetter === event.key && focusableTreeItem.tabIndex === -1) {
-                this.querySelector('[tabindex="0"]').tabIndex = -1;
-                focusableTreeItem.tabIndex = 0;
-                focusableTreeItem.focus();
+              if (currentIsFocused) nextIsCandidate = true;
+
+              if (isLastItem) {
+                const firstCandidate = candidates[0];
+                if (firstCandidate) this.#focusTreeItem(firstCandidate);
                 break;
               }
+
+              index++;
             }
           }
         }
