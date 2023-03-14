@@ -21,7 +21,8 @@
 }
 
 :where(
-  [is="tree-view"] [role="treeitem"]:not([aria-expanded]):hover,
+  [is="tree-view"] [role="treeitem"]:not([aria-expanded]):is(:hover, :focus-visible),
+  [is="tree-view"] [role="treeitem"][aria-expanded]:focus-visible > :first-child,
   [is="tree-view"] [role="treeitem"][aria-expanded="true"] > :first-child:hover
 ) {
   background-color: rgb(0 125 255 / 0.1);
