@@ -1,53 +1,65 @@
-:where([is="tree-view"], [is="tree-view"] [role="group"]) {
-  list-style: none;
-}
+@layer elements.tree-view {
+  :where([is="tree-view"], [is="tree-view"] [role="group"]) {
+    list-style: none;
+  }
 
-:where([is="tree-view"]) {
-  padding-inline-start: 0;
-}
+  :where([is="tree-view"]) {
+    padding-inline-start: 0;
+  }
 
-:where([is="tree-view"] [role="group"]) {
-  padding-inline-start: 1em;
-}
+  :where([is="tree-view"] [role="group"]) {
+    padding-inline-start: 1em;
+  }
 
-:where(
-  [is="tree-view"] [role="treeitem"]:not([aria-expanded]),
-  [is="tree-view"] [role="treeitem"][aria-expanded] > :first-child
-) {
-  cursor: pointer;
-  display: block;
-  padding-block: 0.2em;
-  padding-inline: 0.4em;
-}
+  :where(
+    [is="tree-view"] [role="treeitem"]:not([aria-expanded]),
+    [is="tree-view"] [role="treeitem"][aria-expanded] > :first-child
+  ) {
+    cursor: pointer;
+    display: block;
+    padding-block: 0.2em;
+    padding-inline: 0.4em;
+  }
 
-:where(
-  [is="tree-view"] [role="treeitem"]:not([aria-expanded]):is(:hover, :focus-visible),
-  [is="tree-view"] [role="treeitem"][aria-expanded]:focus-visible > :first-child,
-  [is="tree-view"] [role="treeitem"][aria-expanded="true"] > :first-child:hover
-) {
-  background-color: rgb(0 125 255 / 0.1);
-}
+  :where(
+    [is="tree-view"] [role="treeitem"]:not([aria-expanded]):is(:hover, :focus-visible),
+    [is="tree-view"] [role="treeitem"][aria-expanded]:focus-visible > :first-child,
+    [is="tree-view"] [role="treeitem"][aria-expanded="true"] > :first-child:hover
+  ) {
+    background-color: rgb(0 125 255 / 0.1);
+  }
 
-:where(
-  [is="tree-view"] :is(
-    [aria-selected="true"]:not([aria-expanded]),
-    [aria-selected="true"] > :first-child
-  )
-) {
-  background-color: rgb(0 125 255 / 0.25);
-}
+  :where(
+    [is="tree-view"] :is(
+      [aria-selected="true"]:not([aria-expanded]),
+      [aria-selected="true"] > :first-child
+    )
+  ) {
+    background-color: rgb(0 125 255 / 0.25);
+  }
 
-:where([role="tree"] [role="treeitem"]:focus-visible) {
-  outline: 0;
-}
+  :where([role="tree"] [role="treeitem"]:focus-visible) {
+    outline: 0;
+  }
 
-:where(
-  [role="tree"] [role="treeitem"]:not([aria-expanded]):focus-visible,
-  [role="tree"] [role="treeitem"][aria-expanded]:focus-visible > :first-child,
-) {
-  outline: 2px solid dodgerblue;
-}
+  :where(
+    [role="tree"] [role="treeitem"]:not([aria-expanded]):focus-visible,
+    [role="tree"] [role="treeitem"][aria-expanded]:focus-visible > :first-child,
+  ) {
+    outline: 2px dotted dodgerblue;
+  }
 
-:where([is="tree-view"] [role="treeitem"][aria-expanded="false"] > [role="group"]) {
-  display: none;
+  :where(
+    [is="tree-view"] :is(
+      [aria-selected="true"]:not([aria-expanded]):focus-visible,
+      [aria-selected="true"]:focus-visible > :first-child
+    )
+  ) {
+    outline-style: solid;
+  }
+
+
+  :where([is="tree-view"] [role="treeitem"][aria-expanded="false"] > [role="group"]) {
+    display: none;
+  }
 }

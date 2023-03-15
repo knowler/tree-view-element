@@ -1,17 +1,12 @@
 export class TreeViewElement extends HTMLUListElement {
-  get #treeItems() {
-    return this.querySelectorAll('[role="treeitem"]');
-  }
-
-  get #focusableTreeItems() {
-    return this.querySelectorAll('[role="treeitem"]:is(:not([aria-expanded="false"] *))');
-  }
-
-  get #focusedTreeItem() {
-    return this.querySelector('[role="treeitem"][tabindex="0"]');
-  }
+  get #treeItems() { return this.querySelectorAll('[role="treeitem"]'); }
+  get #focusableTreeItems() { return this.querySelectorAll('[role="treeitem"]:is(:not([aria-expanded="false"] *))'); }
+  get #focusedTreeItem() { return this.querySelector('[role="treeitem"][tabindex="0"]'); }
+  #isTreeItem(treeItem) { return treeItem.matches('[role="treeitem"]'); }
 
   #focusTreeItem(treeItemToFocus) {
+    if (!this.#isTreeItem(treeItemToFocus)) throw "Not a tree item!";
+
     if (this.#focusedTreeItem) this.#focusedTreeItem.tabIndex = -1;
 
     treeItemToFocus.tabIndex = 0;
