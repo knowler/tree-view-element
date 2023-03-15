@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en-ca">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tree View Element Example</title>
+    <link rel="stylesheet" href="tree-view-element.css">
+    <script type="module">
+    import { TreeViewElement } from "./tree-view-element.js";
+    TreeViewElement.define();
+    </script>
+    <style>
+      * { box-sizing: border-box; }
+      html {
+        font-family: system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="files">Files</h1>
+    <ul is="tree-view" role="tree" aria-labelledby="files">
+      <li>
+        <span>app</span>
+        <ul>
+          <li>
+            <span>routes</span>
+            <ul>
+              <li>about.js</li>
+              <li>author.js</li>
+              <li>contact.js</li>
+              <li>index.js</li>
+            </ul>
+          </li>
+          <li>root.js</li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>
